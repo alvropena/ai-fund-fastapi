@@ -1,12 +1,8 @@
 import requests
 from fastapi import APIRouter, HTTPException
+from config import BASE_URL, HEADERS  # Import from config
 
 router = APIRouter()
-
-# Base URL for the financial datasets API
-BASE_URL = "https://api.financialdatasets.ai"
-API_KEY = "<api-key>"
-HEADERS = {"X-API-KEY": API_KEY}
 
 # Insider Transactions Endpoint
 @router.get("/insider-transactions/{ticker}")

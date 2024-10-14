@@ -2,13 +2,9 @@ import requests
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
+from config import BASE_URL, HEADERS  # Import from config
 
 router = APIRouter()
-
-# Base URL for the financial datasets API
-BASE_URL = "https://api.financialdatasets.ai"
-API_KEY = "<api-key>"  # Replace with your actual API key
-HEADERS = {"X-API-KEY": API_KEY}
 
 # Models for POST requests
 class FinancialSearchPayload(BaseModel):
