@@ -30,7 +30,6 @@ def calculate_debt_to_equity(total_debt, shareholder_equity):
         return None  # Avoid division by zero
     return total_debt / shareholder_equity
 
-
 def calculate_return_on_equity(net_income, shareholder_equity):
     """
     Return on Equity (ROE)
@@ -40,7 +39,6 @@ def calculate_return_on_equity(net_income, shareholder_equity):
         return None  # Avoid division by zero
     return net_income / shareholder_equity
 
-
 def calculate_current_ratio(current_assets, current_liabilities):
     """
     Current Ratio
@@ -49,7 +47,6 @@ def calculate_current_ratio(current_assets, current_liabilities):
     if current_liabilities == 0:
         return None  # Avoid division by zero
     return current_assets / current_liabilities
-
 
 def calculate_gross_margin(revenue, cost_of_goods_sold):
     """
