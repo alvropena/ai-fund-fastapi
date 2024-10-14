@@ -21,4 +21,38 @@ def calculate_peg_ratio(pe_ratio, earnings_growth_rate):
 def calculate_ev_ebitda(enterprise_value, ebitda):
     return enterprise_value / ebitda
 
-# Add more models as needed
+def calculate_debt_to_equity(total_debt, shareholder_equity):
+    """
+    Debt-to-Equity (D/E) Ratio
+    Formula: Total Debt / Shareholder Equity
+    """
+    if shareholder_equity == 0:
+        return None  # Avoid division by zero
+    return total_debt / shareholder_equity
+
+def calculate_return_on_equity(net_income, shareholder_equity):
+    """
+    Return on Equity (ROE)
+    Formula: Net Income / Shareholder Equity
+    """
+    if shareholder_equity == 0:
+        return None  # Avoid division by zero
+    return net_income / shareholder_equity
+
+def calculate_current_ratio(current_assets, current_liabilities):
+    """
+    Current Ratio
+    Formula: Current Assets / Current Liabilities
+    """
+    if current_liabilities == 0:
+        return None  # Avoid division by zero
+    return current_assets / current_liabilities
+
+def calculate_gross_margin(revenue, cost_of_goods_sold):
+    """
+    Gross Margin
+    Formula: (Revenue - Cost of Goods Sold) / Revenue * 100
+    """
+    if revenue == 0:
+        return None  # Avoid division by zero
+    return (revenue - cost_of_goods_sold) / revenue * 100
