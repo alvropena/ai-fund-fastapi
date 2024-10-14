@@ -18,6 +18,7 @@ Explore examples and commands to start using the AI Financial Analyst for analyz
 
 ## Contributing
 We welcome contributions! Please follow the guidelines outlined for submitting issues, features, and pull requests.
+This repository pulls all financial information from [https://financialdatasets.ai](https://financialdatasets.ai).
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

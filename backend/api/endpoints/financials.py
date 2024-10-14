@@ -1,9 +1,7 @@
 import requests
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List
 from config import BASE_URL, HEADERS
-from models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse
+from models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse, LineItemSearchResponse
 
 router = APIRouter()
 
@@ -22,7 +20,6 @@ def get_income_statements(ticker: str, period: str = "annual", limit: int = 5):
             raise HTTPException(status_code=500, detail=f"Data validation error: {str(e)}")
     else:
         raise HTTPException(status_code=response.status_code, detail="Error fetching income statements")
-
 
 # 2. Balance Sheets
 @router.get("/financials/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
@@ -106,11 +103,17 @@ def search_financials(payload: FinancialSearchPayload):
         raise HTTPException(status_code=response.status_code, detail="Error performing financial search")
 
 # 7. Search Line Items (POST)
-@router.post("/financials/search/line-items")
+@router.post("/financials/search/line-items", response_model=LineItemSearchResponse)
 def search_line_items(payload: LineItemsPayload):
     url = f"{BASE_URL}/financials/search/line-items"
     response = requests.post(url, json=payload.dict(), headers={**HEADERS, "Content-Type": "application/json"})
+    
     if response.status_code == 200:
-        return response.json()
+        try:
+            data = response.json()            
+            validated_data = LineItemSearchResponse(**data)
+            return validated_data
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Data validation error: {str(e)}")
     else:
         raise HTTPException(status_code=response.status_code, detail="Error performing line items search")
