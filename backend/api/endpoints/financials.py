@@ -2,7 +2,8 @@ import requests
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
-from config import BASE_URL, HEADERS  # Import from config
+from config import BASE_URL, HEADERS
+from models import FinancialSearchPayload, LineItemsPayload
 
 router = APIRouter()
 

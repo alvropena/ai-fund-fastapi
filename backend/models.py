@@ -1,13 +1,15 @@
-from sqlalchemy import Column, Integer, String, Float, Date
-from database import Base
+from pydantic import BaseModel
+from typing import List
 
-class IncomeStatement(Base):
-    __tablename__ = 'income_statements'
-    id = Column(Integer, primary_key=True, index=True)
-    ticker = Column(String, index=True)
-    fiscal_date = Column(Date)
-    revenue = Column(Float)
-    net_income = Column(Float)
-    # Add other relevant fields
+# Models for POST requests
+class FinancialSearchPayload(BaseModel):
+    period: str = "annual"
+    limit: int = 50
+    filters: List[dict]
+    order: str = "asc"
 
-# Define other models similarly
+class LineItemsPayload(BaseModel):
+    line_items: List[str]
+    tickers: List[str]
+    period: str = "annual"
+    limit: int = 2
