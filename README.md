@@ -25,5 +25,10 @@ Specify the license.
 ## Contact
 Your contact information.
 
+## Contributors
+- Stefano Ucelli
+- Luis Mendoza
+- Sebastián Zapata
+
 ## Acknowledgments
 Resources or individuals that helped in the project.
