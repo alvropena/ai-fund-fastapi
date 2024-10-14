@@ -20,7 +20,7 @@ Explore examples and commands to start using the AI Financial Analyst for analyz
 We welcome contributions! Please follow the guidelines outlined for submitting issues, features, and pull requests.
 
 ## License
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 For questions or inquiries, please reach out at [me@alvropena.com](mailto:me@alvropena.com).
