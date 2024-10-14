@@ -1,7 +1,7 @@
 # AI Financial Analyst
 
 ## Description
-A brief overview of what the AI Financial Analyst does and its purpose.
+The AI Financial Analyst is designed to assist in analyzing financial data, enabling informed investment decisions. It leverages financial datasets and valuation models to provide insights into company performance and potential growth.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -11,19 +11,19 @@ A brief overview of what the AI Financial Analyst does and its purpose.
 - [Contact](#contact)
 
 ## Installation
-Step-by-step instructions on how to install the project.
+Follow these steps to set up the project locally, ensuring all dependencies are installed and the environment is correctly configured.
 
 ## Usage
-Examples of how to use the project.
+Explore examples and commands to start using the AI Financial Analyst for analyzing financial data and generating insights.
 
 ## Contributing
-Guidelines for contributing to the project.
+We welcome contributions! Please follow the guidelines outlined for submitting issues, features, and pull requests.
 
 ## License
-Specify the license.
+This project is licensed under the [MIT License](LICENSE).
 
 ## Contact
-Your contact information.
+For questions or inquiries, please reach out at [me@alvropena.com](mailto:me@alvropena.com).
 
 ## Contributors
 - Stefano Ucelli
@@ -31,4 +31,4 @@ Your contact information.
 - Sebastián Zapata
 
 ## Acknowledgments
-Resources or individuals that helped in the project.
+Special thanks to all who provided guidance, tools, and inspiration for this project.
