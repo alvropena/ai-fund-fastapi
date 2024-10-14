@@ -1,1 +1,1 @@
-# ai-financial-analyst
+# AI Financial Analyst
