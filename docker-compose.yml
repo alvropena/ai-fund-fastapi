@@ -1,11 +1,26 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: yourusername
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: financial_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   app:
     build: .
-    volumes:
-      - .:/app
+    depends_on:
+      - db
     ports:
       - "8000:8000"
     environment:
-      - ENV_VAR=your_value
+      - DATABASE_URL=postgresql://yourusername:yourpassword@db:5432/financial_data
+      - FINANCIAL_DATASETS_API_KEY=your_api_key_here
+
+volumes:
+  pgdata:
