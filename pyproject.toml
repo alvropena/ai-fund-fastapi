@@ -6,7 +6,7 @@ authors = ["Alvaro Peña"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.11"
 requests = "^2.32.3"
 pandas = "^2.2.3"
 numpy = "^2.1.2"

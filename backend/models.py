@@ -142,3 +142,9 @@ class LineItemSearchResultModel(BaseModel):
 
 class LineItemSearchResponse(BaseModel):
     search_results: List[LineItemSearchResultModel]
+
+class RatioResponse(BaseModel):
+    ticker: str
+    ratio_name: str
+    ratio_value: float
+    date: date
