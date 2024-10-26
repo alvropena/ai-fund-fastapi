@@ -27,7 +27,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For questions or inquiries, please reach out at [me@alvropena.com](mailto:me@alvropena.com).
 
 ## Contributors
-- Stefano Ucelli
+- Alvaro Peña
 - Luis Mendoza
 - Sebastián Zapata
 
