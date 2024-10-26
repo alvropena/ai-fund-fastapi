@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  run:
+    desc: Run the backend using Docker Compose
+    cmds:
+      - docker-compose up --build
+
+  stop:
+    desc: Stop the running Docker Compose services
+    cmds:
+      - docker-compose down
+
+  logs:
+    desc: View logs of the running services
+    cmds:
+      - docker-compose logs -f
+
+  shell:
+    desc: Open a shell in the running app container
+    cmds:
+      - docker-compose exec app /bin/sh
