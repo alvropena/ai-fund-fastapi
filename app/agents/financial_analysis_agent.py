@@ -137,6 +137,42 @@ class FinancialAnalysisAgent:
                 description="Compare ratios between periods or companies"
             )
         ]
+    
+    def _setup_agent_chain(self) -> AgentExecutor:
+        prompt = PromptTemplate(
+            template="""You are a financial analyst assistant. Use the following tools to help answer questions:
+
+                    {tools}
+
+                    Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+
+    Question: {input}
+{agent_scratchpad}""",
+            input_variables=["input", "tools", "tool_names", "agent_scratchpad"]
+        )
+
+        llm_chain = LLMChain(llm=self.llm, prompt=prompt)
+        agent = LLMSingleActionAgent(
+            llm_chain=llm_chain,
+            tools=self.tools,
+            verbose=True
+        )
+
+        return AgentExecutor.from_agent_and_tools(
+            agent=agent,
+            tools=self.tools,
+            memory=self.memory,
+            verbose=True
+        )
 
     def _calculate_all_ratios(self, ticker: str) -> Dict:
         # Implement comprehensive ratio calculation
