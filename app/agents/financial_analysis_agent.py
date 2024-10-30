@@ -1,8 +1,9 @@
-from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent
+from langchain_openai import OpenAI
+from langchain.agents import AgentExecutor, create_react_agent
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import LLMChain
-from langchain.llms import OpenAI
-from typing import Dict, List, Optional
+from langchain.prompts import PromptTemplate
+from langchain.tools import Tool
+from typing import Dict, List
 from pydantic import BaseModel
 
 class FinancialMetrics(BaseModel):
@@ -139,12 +140,12 @@ class FinancialAnalysisAgent:
         ]
     
     def _setup_agent_chain(self) -> AgentExecutor:
-        prompt = PromptTemplate(
-            template="""You are a financial analyst assistant. Use the following tools to help answer questions:
+        prompt = PromptTemplate.from_template(
+            """You are a financial analyst assistant. Use the following tools to help answer questions:
 
-                    {tools}
+{tools}
 
-                    Use the following format:
+Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
@@ -155,23 +156,24 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question
 
-    Question: {input}
-{agent_scratchpad}""",
-            input_variables=["input", "tools", "tool_names", "agent_scratchpad"]
+Question: {input}
+{agent_scratchpad}"""
         )
 
-        llm_chain = LLMChain(llm=self.llm, prompt=prompt)
-        agent = LLMSingleActionAgent(
-            llm_chain=llm_chain,
+        agent = create_react_agent(
+            llm=self.llm,
             tools=self.tools,
-            verbose=True
+            prompt=prompt
         )
 
         return AgentExecutor.from_agent_and_tools(
             agent=agent,
             tools=self.tools,
             memory=self.memory,
-            verbose=True
+            verbose=True,
+            handle_parsing_errors=True,
+            return_intermediate_steps=False,
+            output_key="output"
         )
 
     def _calculate_all_ratios(self, ticker: str) -> Dict:
@@ -186,6 +188,9 @@ Final Answer: the final answer to the original input question
         # Implement ratio comparison
         pass
 
-    async def analyze(self, query: str) -> str:
+    async def analyze(self, query: str, ticker: str) -> str:
         """Process a financial analysis query"""
-        return await self.agent_chain.arun(query)
+        result = await self.agent_chain.ainvoke(
+            {"input": f"For company {ticker}: {query}"}
+        )
+        return result["output"]
