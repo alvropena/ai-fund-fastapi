@@ -1,7 +1,7 @@
 import requests
 from fastapi import APIRouter, HTTPException
-from backend.config import BASE_URL, HEADERS
-from backend.models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse, LineItemSearchResponse
+from config import BASE_URL, HEADERS
+from models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse, LineItemSearchResponse
 
 router = APIRouter()
 

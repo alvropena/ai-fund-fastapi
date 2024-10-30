@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from backend.api.endpoints import financials
-from backend.models import RatioResponse, BalanceSheetsResponse, IncomeStatementModel
-from backend.api.endpoints.ratios.liquidity_ratios import get_current_ratio, get_acid_test, get_defensive_interval
-from backend.api.endpoints.ratios.ebitda_ratios import get_ebitda_margin
-from backend.api.endpoints.ratios.leverage_ratios import get_debt_ratio, get_solvency_ratio, get_leverage
-from backend.api.endpoints.ratios.efficiency_ratios import get_inventory_turnover, get_stock_retention_period, get_accounts_receivable_turnover
+from app.endpoints import financials
+from models import RatioResponse, BalanceSheetsResponse, IncomeStatementModel
+from app.endpoints.ratios.liquidity_ratios import get_current_ratio, get_acid_test, get_defensive_interval
+from app.endpoints.ratios.ebitda_ratios import get_ebitda_margin
+from app.endpoints.ratios.leverage_ratios import get_debt_ratio, get_solvency_ratio, get_leverage
+from app.endpoints.ratios.efficiency_ratios import get_inventory_turnover, get_stock_retention_period, get_accounts_receivable_turnover
 
 router = APIRouter()
 

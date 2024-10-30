@@ -1,6 +1,6 @@
 import requests
 from fastapi import APIRouter, HTTPException
-from backend.config import BASE_URL, HEADERS  # Import from config
+from config import BASE_URL, HEADERS  # Import from config
 
 router = APIRouter()
 

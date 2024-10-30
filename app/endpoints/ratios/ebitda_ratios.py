@@ -1,5 +1,5 @@
-from backend.models import RatioResponse, IncomeStatementModel
-from backend.api.endpoints import financials
+from models import RatioResponse, IncomeStatementModel
+from app.endpoints import financials
 from fastapi import APIRouter, HTTPException, Depends
 
 router = APIRouter()

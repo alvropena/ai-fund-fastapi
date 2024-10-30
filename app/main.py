@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from backend.api.endpoints import company, financials, insider_transactions, prices
-from backend.api.endpoints.ratios import ratios
-from backend.api.endpoints.ratios import ebitda_ratios, efficiency_ratios, leverage_ratios, liquidity_ratios
-from backend.api.endpoints.ratios.ratios import router as ratios_router
+from app.endpoints import company, financials, insider_transactions, prices
+from app.endpoints.ratios import ratios
+from app.endpoints.ratios import ebitda_ratios, efficiency_ratios, leverage_ratios, liquidity_ratios
+from app.endpoints.ratios.ratios import router as ratios_router
 
 app = FastAPI(title="AI Financial Analyst API")
 
