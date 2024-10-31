@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from app.endpoints import company, financials, insider_transactions, prices
-from app.agents.financial_analysis_agent import FinancialAnalysisAgent
+from app.agents.financial_metrics_agent import FinancialAnalysisAgent
 
 app = FastAPI(title="AI Financial Analyst API")
 
