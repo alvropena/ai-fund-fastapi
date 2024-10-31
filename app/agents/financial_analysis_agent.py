@@ -5,6 +5,7 @@ from langchain.prompts import PromptTemplate
 from langchain.tools import Tool
 from typing import Dict, List
 from pydantic import BaseModel
+from app.endpoints.financials import get_balance_sheets, get_income_statements
 
 class FinancialMetrics(BaseModel):
     """Container for all financial metrics calculations"""
@@ -16,38 +17,17 @@ class FinancialMetrics(BaseModel):
             "defensive_interval_ratio": balance_sheet["cash_and_equivalents"] / balance_sheet["current_liabilities"]
         }
     
-    def calculate_profitability_ratios(self, income_statement: Dict, balance_sheet: Dict) -> Dict:
+    def calculate_ebitda_ratios(self, income_statement: Dict, cash_flow_statement: Dict) -> Dict:
         return {
-            "sales_margin": income_statement["net_income"] / income_statement["revenues"],
-            "return_on_assets": income_statement["net_income"] / balance_sheet["total_assets"],
-            "return_on_equity": income_statement["net_income"] / balance_sheet["total_equity"]
+            "ebitda": income_statement["ebit"] + cash_flow_statement["depreciation_and_amortization"],
+            "ebitda_margin": (income_statement["ebit"] + cash_flow_statement["depreciation_and_amortization"]) / income_statement["revenues"]
         }
     
-    def calculate_ebitda_ratios(self, income_statement: Dict) -> Dict:
+    def calculate_leverage_ratios(self, balance_sheet: Dict) -> Dict:
         return {
-            "ebitda_margin": income_statement["ebit"] / income_statement["revenue"]
-        }
-    
-    def calculate_dupont_ratios(self, income_statement: Dict, balance_sheet: Dict) -> Dict:
-        return {
-            "sales_margin": income_statement["net_income"] / income_statement["revenues"],
-            "asset_turnover": income_statement["revenues"] / balance_sheet["total_assets"],
-            "leverage": balance_sheet["total_assets"] / balance_sheet["total_equity"]
-        }
-    
-    def calculate_economic_value_ratios(
-        self, 
-        income_statement: Dict, 
-        balance_sheet: Dict, 
-        cost_of_equity: float
-    ) -> Dict:
-        roe = income_statement["net_income"] / balance_sheet["total_equity"]
-        economic_margin = roe - cost_of_equity
-        eva = economic_margin * balance_sheet["total_equity"]
-        
-        return {
-            "economic_margin": economic_margin,
-            "economic_value_added": eva
+            "debt_ratio": balance_sheet["total_liabilities"] / balance_sheet["total_assets"],
+            "solvency_ratio": (balance_sheet["total_liabilities"] + balance_sheet["shareholders_equity"]) / balance_sheet["total_assets"],
+            "leverage": balance_sheet["total_assets"] / (balance_sheet["total_liabilities"] + balance_sheet["shareholders_equity"])
         }
 
     def calculate_efficiency_ratios(self, income_statement: Dict, balance_sheet: Dict) -> Dict:
@@ -66,24 +46,51 @@ class FinancialMetrics(BaseModel):
             "payment_period": 365 / payables_turnover,
             "asset_turnover": asset_turnover
         }
-    
-    def calculate_leverage_ratios(self, balance_sheet: Dict) -> Dict:
+
+    def calculate_profitability_ratios(self, income_statement: Dict, balance_sheet: Dict) -> Dict:
         return {
-            "debt_ratio": balance_sheet["total_liabilities"] / balance_sheet["total_assets"],
-            "solvency_ratio": balance_sheet["shareholders_equity"] / balance_sheet["total_assets"],
-            "leverage": balance_sheet["total_assets"] / balance_sheet["shareholders_equity"]
+            "sales_margin": income_statement["net_income"] / income_statement["revenues"],
+            "return_on_assets": income_statement["net_income"] / balance_sheet["total_assets"],
+            "return_on_equity": income_statement["net_income"] / (balance_sheet["total_assets"] + balance_sheet["total_liabilities"])
+        }
+
+    def calculate_dupont_ratios(self, income_statement: Dict, balance_sheet: Dict) -> Dict:
+        return {
+            "sales_margin": income_statement["net_income"] / income_statement["revenues"],
+            "asset_turnover": income_statement["revenues"] / balance_sheet["total_assets"],
+            "leverage": balance_sheet["total_assets"] / (balance_sheet["total_liabilities"] + balance_sheet["total_assets"])
+        }
+    
+    def calculate_economic_value_ratios(
+        self, 
+        income_statement: Dict, 
+        balance_sheet: Dict, 
+        cost_of_equity: float
+    ) -> Dict:
+        sales_margin = income_statement["net_income"] / income_statement["revenues"]
+        asset_turnover = income_statement["revenues"] / balance_sheet["total_assets"]
+        leverage = balance_sheet["total_assets"] / (balance_sheet["total_liabilities"] + balance_sheet["total_assets"])
+        
+        roe = sales_margin * asset_turnover * leverage
+        economic_margin = roe - cost_of_equity
+        eva = economic_margin * (balance_sheet["total_assets"] + balance_sheet["total_liabilities"])
+        
+        return {
+            "economic_margin": economic_margin,
+            "economic_value_added": eva
         }
 
     def calculate_stock_performance_ratios(
         self,
         income_statement: Dict,
         balance_sheet: Dict,
+        cash_flow_statement: Dict,
         stock_price: float
     ) -> Dict:
-        outstanding_shares = balance_sheet["shares_outstanding"]
+        outstanding_shares = balance_sheet["outstanding_shares"]
         net_income = income_statement["net_income"]
-        total_equity = balance_sheet["total_equity"]
-        dividends = income_statement.get("dividends", 0)
+        total_equity = balance_sheet["total_assets"] + balance_sheet["total_liabilities"]
+        dividends = cash_flow_statement["dividends_and_other_cash_distributions"]
 
         # Guard against division by zero
         if outstanding_shares == 0:
@@ -125,39 +132,27 @@ class FinancialAnalysisAgent:
             Tool(
                 name="CalculateRatios",
                 func=self._calculate_all_ratios,
-                description="Calculate all financial ratios for a given company"
-            ),
-            Tool(
-                name="AnalyzeRatios",
-                func=self._analyze_ratios,
-                description="Provide analysis of financial ratios"
-            ),
-            Tool(
-                name="CompareRatios",
-                func=self._compare_ratios,
-                description="Compare ratios between periods or companies"
+                description="Calculate financial ratios for a given company ticker"
             )
         ]
     
     def _setup_agent_chain(self) -> AgentExecutor:
         prompt = PromptTemplate.from_template(
-            """You are a financial analyst assistant. Use the following tools to help answer questions:
+            """You are a financial calculator that provides ratio calculations. You do not provide analysis or comparisons, only calculations and their explanations.
 
-{tools}
+        {tools}
 
-Use the following format:
+        Use this format:
+        Question: the input question you must answer
+        Thought: consider which ratios need to be calculated
+        Action: CalculateRatios
+        Action Input: the ticker symbol
+        Observation: the calculated ratios
+        Thought: explain the calculated numbers
+        Final Answer: explain what each calculated number represents without providing analysis or recommendations
 
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
-
-Question: {input}
-{agent_scratchpad}"""
+        Question: {input}
+        {agent_scratchpad}"""
         )
 
         agent = create_react_agent(
@@ -176,20 +171,26 @@ Question: {input}
             output_key="output"
         )
 
-    def _calculate_all_ratios(self, ticker: str) -> Dict:
-        # Implement comprehensive ratio calculation
-        pass
+    async def _calculate_all_ratios(self, ticker: str) -> Dict:
+        """Calculate all financial ratios for a given ticker"""
+        try:
+            balance_sheet_data = get_balance_sheets(ticker=ticker, period="annual", limit=1)
+            income_statement_data = get_income_statements(ticker=ticker, period="annual", limit=1)
+            
+            balance_sheet = balance_sheet_data.balance_sheets[0]  # Most recent
+            income_statement = income_statement_data.income_statements[0]  # Most recent
 
-    def _analyze_ratios(self, ratios: Dict) -> str:
-        # Implement ratio analysis
-        pass
-
-    def _compare_ratios(self, ratios_a: Dict, ratios_b: Dict) -> str:
-        # Implement ratio comparison
-        pass
+            return {
+                "liquidity_ratios": self.metrics.calculate_liquidity_ratios(balance_sheet),
+                "profitability_ratios": self.metrics.calculate_profitability_ratios(income_statement, balance_sheet),
+                "leverage_ratios": self.metrics.calculate_leverage_ratios(balance_sheet),
+                "efficiency_ratios": self.metrics.calculate_efficiency_ratios(income_statement, balance_sheet)
+            }
+        except Exception as e:
+            return {"error": f"Error calculating ratios: {str(e)}"}
 
     async def analyze(self, query: str, ticker: str) -> str:
-        """Process a financial analysis query"""
+        """Process a financial calculation query"""
         result = await self.agent_chain.ainvoke(
             {"input": f"For company {ticker}: {query}"}
         )
