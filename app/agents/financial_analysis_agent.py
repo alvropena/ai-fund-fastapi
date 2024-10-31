@@ -140,6 +140,8 @@ class FinancialAnalysisAgent:
         prompt = PromptTemplate.from_template(
             """You are a financial calculator that provides ratio calculations. You do not provide analysis or comparisons, only calculations and their explanations.
 
+        Tools available: {tool_names}
+
         {tools}
 
         Use this format:
