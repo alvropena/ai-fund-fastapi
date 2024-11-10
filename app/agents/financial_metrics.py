@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Dict, Any
-from app.models.financial_statements import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
+from models import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
 
 class FinancialMetrics(BaseModel):
     """Container for all financial metrics calculations"""
