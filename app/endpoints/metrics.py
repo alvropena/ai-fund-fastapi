@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Optional, List
 from app.agents.financial_metrics import FinancialMetrics
 from app.schemas.financial_metrics import GroupedMetrics
-from models import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
+from models import BalanceSheetsResponse, IncomeStatementsResponse, CashFlowStatementsResponse
 from app.endpoints.financial_datasets.financials import (
     get_income_statements,
     get_balance_sheets,
@@ -13,18 +13,21 @@ from app.endpoints.financial_datasets.financials import (
 router = APIRouter()
 
 async def get_grouped_metrics(
-    balance_sheets: List[BalanceSheetModel],
-    income_statements: List[IncomeStatementModel], 
-    cash_flow_statements: List[CashFlowStatementModel],
+    balance_sheets: BalanceSheetsResponse,
+    income_statements: IncomeStatementsResponse, 
+    cash_flow_statements: CashFlowStatementsResponse,
     stock_price: float,
     cost_of_equity: float,
     metrics: FinancialMetrics
 ) -> List[GroupedMetrics]:
     """Calculate all financial metric groups for each year of financial statements"""
-    grouped_metrics = []    
+    grouped_metrics = []
     
+    # Access the actual lists inside the response objects
     for balance_sheet, income_statement, cash_flow_statement in zip(
-        balance_sheets, income_statements, cash_flow_statements
+        balance_sheets.balance_sheets,
+        income_statements.income_statements,
+        cash_flow_statements.cash_flow_statements
     ):
         metrics_for_period = GroupedMetrics(
             liquidity=metrics.calculate_liquidity_ratios(balance_sheet),
@@ -55,19 +58,7 @@ async def get_ticker_metrics(
     # Get financial statements
     income_statements = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
     balance_sheets = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
-    cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)
-
-    # Print the raw data and their types
-    print("\n=== Financial Statements Data ===")
-    print(f"Income Statements Type: {type(income_statements)}")
-    print(f"Income Statements Data: {income_statements}")
-    print("\n")
-    print(f"Balance Sheets Type: {type(balance_sheets)}")
-    print(f"Balance Sheets Data: {balance_sheets}")
-    print("\n")
-    print(f"Cash Flows Type: {type(cash_flows)}")
-    print(f"Cash Flows Data: {cash_flows}")
-    print("\n===========================")    
+    cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)  
 
     # Validate we have data
     if not (income_statements and balance_sheets and cash_flows):
