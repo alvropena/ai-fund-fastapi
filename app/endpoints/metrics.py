@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Optional, List
 from app.agents.financial_metrics import FinancialMetrics
 from app.schemas.financial_metrics import GroupedMetrics
+from app.models.financial_statements import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
 from app.endpoints.financial_datasets.financials import (
     get_income_statements,
     get_balance_sheets,
@@ -12,9 +13,9 @@ from app.endpoints.financial_datasets.financials import (
 router = APIRouter()
 
 async def get_grouped_metrics(
-    balance_sheets: List[Dict],
-    income_statements: List[Dict], 
-    cash_flow_statements: List[Dict],
+    balance_sheets: List[BalanceSheetModel],
+    income_statements: List[IncomeStatementModel], 
+    cash_flow_statements: List[CashFlowStatementModel],
     stock_price: float,
     cost_of_equity: float,
     metrics: FinancialMetrics
@@ -22,13 +23,14 @@ async def get_grouped_metrics(
     """Calculate all financial metric groups for each year of financial statements"""
     grouped_metrics = []
     
+    # Extract the models from the tuples if necessary
+    balance_sheets = balance_sheets[1] if isinstance(balance_sheets, tuple) else balance_sheets
+    income_statements = income_statements[1] if isinstance(income_statements, tuple) else income_statements
+    cash_flow_statements = cash_flow_statements[1] if isinstance(cash_flow_statements, tuple) else cash_flow_statements
+    
     for balance_sheet, income_statement, cash_flow_statement in zip(
         balance_sheets, income_statements, cash_flow_statements
     ):
-        print("Balance Sheet Data:", balance_sheet)
-        print("Income Statement Data:", income_statement) 
-        print("Cash Flow Statement Data:", cash_flow_statement)
-        
         metrics_for_period = GroupedMetrics(
             liquidity=metrics.calculate_liquidity_ratios(balance_sheet),
             ebitda=metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement),
