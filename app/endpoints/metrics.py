@@ -21,12 +21,7 @@ async def get_grouped_metrics(
     metrics: FinancialMetrics
 ) -> List[GroupedMetrics]:
     """Calculate all financial metric groups for each year of financial statements"""
-    grouped_metrics = []
-    
-    # Extract the models from the tuples if necessary
-    balance_sheets = balance_sheets[1] if isinstance(balance_sheets, tuple) else balance_sheets
-    income_statements = income_statements[1] if isinstance(income_statements, tuple) else income_statements
-    cash_flow_statements = cash_flow_statements[1] if isinstance(cash_flow_statements, tuple) else cash_flow_statements
+    grouped_metrics = []    
     
     for balance_sheet, income_statement, cash_flow_statement in zip(
         balance_sheets, income_statements, cash_flow_statements
@@ -58,14 +53,21 @@ async def get_ticker_metrics(
     metrics: FinancialMetrics = Depends()
 ):
     # Get financial statements
-    income_stmt = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
-    balance_sheet = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
-    cash_flow = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)
+    income_statements = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
+    balance_sheets = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
+    cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)
 
-    # Extract the actual statement data from the response tuples
-    income_statements = income_stmt[1] if isinstance(income_stmt, tuple) else income_stmt
-    balance_sheets = balance_sheet[1] if isinstance(balance_sheet, tuple) else balance_sheet
-    cash_flows = cash_flow[1] if isinstance(cash_flow, tuple) else cash_flow
+    # Print the raw data and their types
+    print("\n=== Financial Statements Data ===")
+    print(f"Income Statements Type: {type(income_statements)}")
+    print(f"Income Statements Data: {income_statements}")
+    print("\n")
+    print(f"Balance Sheets Type: {type(balance_sheets)}")
+    print(f"Balance Sheets Data: {balance_sheets}")
+    print("\n")
+    print(f"Cash Flows Type: {type(cash_flows)}")
+    print(f"Cash Flows Data: {cash_flows}")
+    print("\n===========================")    
 
     # Validate we have data
     if not (income_statements and balance_sheets and cash_flows):
