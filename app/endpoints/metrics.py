@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Optional, List
 from app.agents.financial_metrics import FinancialMetrics
 from app.schemas.financial_metrics import GroupedMetrics
-from app.models.financial_statements import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
+from models import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
 from app.endpoints.financial_datasets.financials import (
     get_income_statements,
     get_balance_sheets,
