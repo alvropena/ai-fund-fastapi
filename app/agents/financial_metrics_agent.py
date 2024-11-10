@@ -4,7 +4,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.tools import Tool
 from typing import Dict, List
-from app.endpoints.financials import get_balance_sheets, get_income_statements
+from app.endpoints.financial_datasets.financials import get_balance_sheets, get_income_statements
 from app.agents.financial_metrics import FinancialMetrics
 
 class FinancialMetricsAgent:

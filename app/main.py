@@ -1,7 +1,8 @@
+from app.endpoints.financial_datasets import company, financials
 from fastapi import FastAPI, Depends
-from app.endpoints import company, financials, insider_transactions, prices, metrics
+from app.endpoints import insider_transactions, prices, metrics
 
-app = FastAPI(title="AI Financial Analyst API")
+app = FastAPI(title="AI Fund API")
 
 app.include_router(company.router, prefix="/company", tags=["Company"])
 app.include_router(financials.router, prefix="/financials", tags=["Financials"])

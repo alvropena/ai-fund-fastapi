@@ -1,14 +1,29 @@
 import requests
+from enum import Enum
 from fastapi import APIRouter, HTTPException
 from config import BASE_URL, HEADERS
 from models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse, LineItemSearchResponse
 
 router = APIRouter()
 
+class FinancialPeriod(str, Enum):
+    ANNUAL = "annual"
+    QUARTERLY = "quarterly" 
+    TTM = "ttm"
+
 # 1. Income Statements
 @router.get("/financials/income-statements/{ticker}", response_model=IncomeStatementsResponse)
-def get_income_statements(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period}&limit={limit}"
+def get_income_statements(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL, 
+    limit: int | None = None,
+    cik: str | None = None
+):
+    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -23,8 +38,17 @@ def get_income_statements(ticker: str, period: str = "annual", limit: int = 5):
 
 # 2. Balance Sheets
 @router.get("/financials/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
-def get_balance_sheets(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period}&limit={limit}"
+def get_balance_sheets(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL,
+    limit: int | None = None,
+    cik: str | None = None
+):
+    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -39,8 +63,17 @@ def get_balance_sheets(ticker: str, period: str = "annual", limit: int = 5):
 
 # 3. Cash Flow Statements
 @router.get("/financials/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
-def get_cash_flow_statements(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period}&limit={limit}"
+def get_cash_flow_statements(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL,
+    limit: int | None = None,
+    cik: str | None = None
+):
+    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
