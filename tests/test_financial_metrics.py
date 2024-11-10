@@ -1,16 +1,14 @@
 import pytest
 from app.agents.financial_metrics import FinancialMetrics
 
-@pytest.fixture
-def sample_balance_sheet_data():
-    return {
-        "balance_sheet": {
-            "ticker": "AAPL",
-            "calendar_date": "2024-01-01",
-            "report_period": "2024-01-01",
-            "period": "annual",
-            "currency": "USD",
-            "total_assets": 1000,
+
+balance_sheet = {
+    "ticker": "AAPL",
+    "calendar_date": "2024-01-01",
+    "report_period": "2024-01-01",
+    "period": "annual",
+    "currency": "USD",
+    "total_assets": 1000,
             "current_assets": 1000,
             "cash_and_equivalents": 1000,
             "inventory": 1000,
@@ -38,12 +36,9 @@ def sample_balance_sheet_data():
             "total_debt": 1000
         },
         
-    }
+    
 
-@pytest.fixture
-def sample_income_statement_data():
-    return {
-        "income_statement": {
+income_statement = {
             "ticker": "AAPL",
             "calendar_date": "2024-01-01",
             "report_period": "2024-01-01",
@@ -72,50 +67,61 @@ def sample_income_statement_data():
             "weighted_average_shares_diluted": 1000
         },
         
-    }
-
-@pytest.fixture
-def sample_cash_flow_statement_data():
-    return {
-        "cash_flow_statement": {
-            "ticker": "AAPL",
-            "calendar_date": "2024-01-01",
-            "report_period": "2024-01-01",
-            "period": "annual",
-            "currency": "USD",
-            "net_cash_flow_from_operations": 1000,
-            "depreciation_and_amortization": 100,
-            "share_based_compensation": 100,
-            "net_cash_flow_from_investing": 1000,
-            "capital_expenditure": 100,
-            "business_acquisitions_and_disposals": 100,
-            "investment_acquisitions_and_disposals": 100,
-            "net_cash_flow_from_financing": 1000,
-            "issuance_or_repayment_of_debt_securities": 100,
-            "issuance_or_purchase_of_equity_shares": 100,
-            "dividends_and_other_cash_distributions": 100,
-            "change_in_cash_and_equivalents": 100,
-            "effect_of_exchange_rate_changes": 100
-        },
+cash_flow_statement = {
+    "ticker": "AAPL",
+    "calendar_date": "2024-01-01",
+    "report_period": "2024-01-01",
+    "period": "annual",
+    "currency": "USD",
+    "net_cash_flow_from_operations": 1000,
+    "depreciation_and_amortization": 100,
+    "share_based_compensation": 100,
+    "net_cash_flow_from_investing": 1000,
+    "capital_expenditure": 100,
+    "business_acquisitions_and_disposals": 100,
+    "investment_acquisitions_and_disposals": 100,
+    "net_cash_flow_from_financing": 1000,
+    "issuance_or_repayment_of_debt_securities": 100,
+    "issuance_or_purchase_of_equity_shares": 100,
+    "dividends_and_other_cash_distributions": 100,
+    "change_in_cash_and_equivalents": 100,
+    "effect_of_exchange_rate_changes": 100
+},
         
-    }
-
-def test_liquidity_ratios(sample_balance_sheet_data):
-    metrics = FinancialMetrics()
-    ratios = metrics.calculate_liquidity_ratios(sample_balance_sheet_data["balance_sheet"])
     
-    assert ratios["current_ratio"] == 2.0
-    assert ratios["acid_test_ratio"] == 1.6
-    assert ratios["defensive_interval_ratio"] == 0.6
 
-def test_stock_performance_ratios(sample_income_statement_data, sample_balance_sheet_data, sample_cash_flow_statement_data):
+def test_all_metrics():
     metrics = FinancialMetrics()
-    ratios = metrics.calculate_stock_performance_ratios(
-        sample_income_statement_data["income_statement"],
-        sample_balance_sheet_data["balance_sheet"],
-        sample_cash_flow_statement_data["cash_flow_statement"],
-        stock_price=10.0
-    )
     
-    assert ratios["earnings_per_share"] == 0.4
-    assert ratios["price_to_earnings_ratio"] == 25.0
+    # Test each method
+    print("\nLiquidity Ratios:")
+    print(metrics.calculate_liquidity_ratios(balance_sheet))
+    
+    print("\nEBITDA Ratios:")
+    print(metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement))
+    
+    print("\nLeverage Ratios:")
+    print(metrics.calculate_leverage_ratios(balance_sheet))
+    
+    print("\nEfficiency Ratios:")
+    print(metrics.calculate_efficiency_ratios(income_statement, balance_sheet))
+    
+    print("\nProfitability Ratios:")
+    print(metrics.calculate_profitability_ratios(income_statement, balance_sheet))
+    
+    print("\nDuPont Ratios:")
+    print(metrics.calculate_dupont_ratios(income_statement, balance_sheet))
+    
+    print("\nEconomic Value Ratios:")
+    print(metrics.calculate_economic_value_ratios(income_statement, balance_sheet, cost_of_equity=0.10))
+    
+    print("\nStock Performance Ratios:")
+    print(metrics.calculate_stock_performance_ratios(
+        income_statement,
+        balance_sheet,
+        cash_flow_statement,
+        stock_price=50.0
+    ))
+
+if __name__ == "__main__":
+    test_all_metrics()

@@ -1,4 +1,4 @@
-# AI Financial Analyst
+# AI Fund
 
 ## Description
 
