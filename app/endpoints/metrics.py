@@ -80,24 +80,86 @@ async def get_ticker_metrics(
     cik: str | None = None,
     metrics: FinancialMetrics = Depends()
 ):
-    # Get financial statements
-    income_statements = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
-    balance_sheets = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
-    cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)  
+    try:
+        # Get financial statements with logging
+        print(f"Fetching financial data for {ticker}")
+        
+        income_statements = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
+        print(f"Income statements retrieved: {bool(income_statements)}")
+        if income_statements:
+            print(f"Number of income statements: {len(income_statements.income_statements)}")
+        
+        balance_sheets = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
+        print(f"Balance sheets retrieved: {bool(balance_sheets)}")
+        if balance_sheets:
+            print(f"Number of balance sheets: {len(balance_sheets.balance_sheets)}")
+        
+        cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)
+        print(f"Cash flows retrieved: {bool(cash_flows)}")
+        if cash_flows:
+            print(f"Number of cash flows: {len(cash_flows.cash_flow_statements)}")
 
-    # Validate we have data
-    if not (income_statements and balance_sheets and cash_flows):
+        # Validate we have data with more specific error messages
+        if not income_statements:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No income statements found for {ticker}"
+            )
+        if not balance_sheets:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No balance sheets found for {ticker}"
+            )
+        if not cash_flows:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No cash flow statements found for {ticker}"
+            )
+
+        # Additional validation for empty lists
+        if not income_statements.income_statements:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Income statements list is empty for {ticker}"
+            )
+        if not balance_sheets.balance_sheets:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Balance sheets list is empty for {ticker}"
+            )
+        if not cash_flows.cash_flow_statements:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Cash flow statements list is empty for {ticker}"
+            )
+
+        print(f"All financial data retrieved successfully for {ticker}")
+
+        try:
+            # Calculate grouped metrics for each period
+            result = await get_grouped_metrics(
+                balance_sheets=balance_sheets,
+                income_statements=income_statements,
+                cash_flow_statements=cash_flows,
+                stock_price=stock_price,
+                cost_of_equity=cost_of_equity,
+                metrics=metrics
+            )
+            print(f"Metrics calculated successfully for {ticker}")
+            return result
+        except Exception as calc_error:
+            print(f"Error calculating metrics for {ticker}: {str(calc_error)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error calculating metrics for {ticker}: {str(calc_error)}"
+            )
+
+    except HTTPException as http_error:
+        # Re-raise HTTP exceptions
+        raise http_error
+    except Exception as e:
+        print(f"Unexpected error processing {ticker}: {str(e)}")
         raise HTTPException(
-            status_code=404,
-            detail=f"Unable to fetch complete financial data for {ticker}"
+            status_code=500,
+            detail=f"Unexpected error processing {ticker}: {str(e)}"
         )
-
-    # Calculate grouped metrics for each period
-    return await get_grouped_metrics(
-        balance_sheets=balance_sheets,
-        income_statements=income_statements,
-        cash_flow_statements=cash_flows,
-        stock_price=stock_price,
-        cost_of_equity=cost_of_equity,
-        metrics=metrics
-    )
