@@ -60,17 +60,7 @@ async def get_grouped_metrics(
                 MetricGroup(category=MetricCategory.STOCK_PERFORMANCE, metrics=stock_performance_metrics),
             ]
 
-            metrics_for_period = GroupedMetrics(
-                groups=metric_groups,  # Add the groups field
-                liquidity=liquidity_metrics,
-                ebitda=ebitda_metrics,
-                leverage=leverage_metrics,
-                efficiency=efficiency_metrics,
-                profitability=profitability_metrics,
-                dupont=dupont_metrics,
-                economic_value=economic_value_metrics,
-                stock_performance=stock_performance_metrics
-            )
+            metrics_for_period = GroupedMetrics(groups=metric_groups)
             grouped_metrics.append(metrics_for_period)
         except Exception as e:
             raise HTTPException(

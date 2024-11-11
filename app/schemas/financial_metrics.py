@@ -17,16 +17,8 @@ class MetricGroup(BaseModel):
     metrics: Dict[str, Optional[float]]
 
 class GroupedMetrics(BaseModel):
-    """Pydantic model for grouped financial metrics with nullable values"""
+    """Pydantic model for grouped financial metrics"""
     groups: List[MetricGroup]
-    liquidity: Dict[str, Optional[float]]
-    ebitda: Dict[str, Optional[float]]
-    leverage: Dict[str, Optional[float]]
-    efficiency: Dict[str, Optional[float]]
-    profitability: Dict[str, Optional[float]]
-    dupont: Dict[str, Optional[float]]
-    economic_value: Dict[str, Optional[float]]
-    stock_performance: Dict[str, Union[float, str, None]]
 
     class Config:
         from_attributes = True
