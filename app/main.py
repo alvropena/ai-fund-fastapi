@@ -1,6 +1,6 @@
-from app.endpoints.financial_datasets import company, financials
+from app.endpoints.financial_datasets import company, financials, insider_transactions, prices
 from fastapi import FastAPI, Depends
-from app.endpoints import insider_transactions, prices, metrics
+from app.endpoints import metrics
 
 app = FastAPI(title="AI Fund API")
 
