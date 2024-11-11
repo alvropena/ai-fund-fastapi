@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Optional, List
 from app.agents.financial_metrics import FinancialMetrics
-from app.schemas.financial_metrics import GroupedMetrics
+from app.schemas.financial_metrics import GroupedMetrics, MetricGroup, MetricCategory
 from models import BalanceSheetsResponse, IncomeStatementsResponse, CashFlowStatementsResponse
 from app.endpoints.financial_datasets.financials import (
     get_income_statements,
@@ -23,25 +23,60 @@ async def get_grouped_metrics(
     """Calculate all financial metric groups for each year of financial statements"""
     grouped_metrics = []
     
-    # Access the actual lists inside the response objects
     for balance_sheet, income_statement, cash_flow_statement in zip(
         balance_sheets.balance_sheets,
         income_statements.income_statements,
         cash_flow_statements.cash_flow_statements
     ):
-        metrics_for_period = GroupedMetrics(
-            liquidity=metrics.calculate_liquidity_ratios(balance_sheet),
-            ebitda=metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement),
-            leverage=metrics.calculate_leverage_ratios(balance_sheet),
-            efficiency=metrics.calculate_efficiency_ratios(income_statement, balance_sheet),
-            profitability=metrics.calculate_profitability_ratios(income_statement, balance_sheet),
-            dupont=metrics.calculate_dupont_ratios(income_statement, balance_sheet),
-            economic_value=metrics.calculate_economic_value_ratios(income_statement, balance_sheet, cost_of_equity),
-            stock_performance=metrics.calculate_stock_performance_ratios(
-                income_statement, balance_sheet, cash_flow_statement, stock_price
+        try:
+            # Calculate all metrics
+            liquidity_metrics = metrics.calculate_liquidity_ratios(balance_sheet)
+            ebitda_metrics = metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement)
+            leverage_metrics = metrics.calculate_leverage_ratios(balance_sheet)
+            efficiency_metrics = metrics.calculate_efficiency_ratios(income_statement, balance_sheet)
+            profitability_metrics = metrics.calculate_profitability_ratios(income_statement, balance_sheet)
+            dupont_metrics = metrics.calculate_dupont_ratios(income_statement, balance_sheet)
+            economic_value_metrics = metrics.calculate_economic_value_ratios(
+                income_statement, 
+                balance_sheet, 
+                cost_of_equity
             )
-        )
-        grouped_metrics.append(metrics_for_period)
+            stock_performance_metrics = metrics.calculate_stock_performance_ratios(
+                income_statement, 
+                balance_sheet, 
+                cash_flow_statement, 
+                stock_price
+            )
+
+            # Create MetricGroup objects for each category
+            metric_groups = [
+                MetricGroup(category=MetricCategory.LIQUIDITY, metrics=liquidity_metrics),
+                MetricGroup(category=MetricCategory.EBITDA, metrics=ebitda_metrics),
+                MetricGroup(category=MetricCategory.LEVERAGE, metrics=leverage_metrics),
+                MetricGroup(category=MetricCategory.EFFICIENCY, metrics=efficiency_metrics),
+                MetricGroup(category=MetricCategory.PROFITABILITY, metrics=profitability_metrics),
+                MetricGroup(category=MetricCategory.DUPONT, metrics=dupont_metrics),
+                MetricGroup(category=MetricCategory.ECONOMIC_VALUE, metrics=economic_value_metrics),
+                MetricGroup(category=MetricCategory.STOCK_PERFORMANCE, metrics=stock_performance_metrics),
+            ]
+
+            metrics_for_period = GroupedMetrics(
+                groups=metric_groups,  # Add the groups field
+                liquidity=liquidity_metrics,
+                ebitda=ebitda_metrics,
+                leverage=leverage_metrics,
+                efficiency=efficiency_metrics,
+                profitability=profitability_metrics,
+                dupont=dupont_metrics,
+                economic_value=economic_value_metrics,
+                stock_performance=stock_performance_metrics
+            )
+            grouped_metrics.append(metrics_for_period)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error calculating metrics: {str(e)}"
+            )
         
     return grouped_metrics
 
