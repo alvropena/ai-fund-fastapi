@@ -1,30 +1,79 @@
 import requests
+from enum import Enum
 from fastapi import APIRouter, HTTPException
 from config import BASE_URL, HEADERS
 from models import FinancialSearchPayload, LineItemsPayload, IncomeStatementsResponse, BalanceSheetsResponse, CashFlowStatementsResponse, SegmentedFinancialsResponse, AllFinancialsResponse, FinancialSearchResponse, LineItemSearchResponse
 
 router = APIRouter()
 
+class FinancialPeriod(str, Enum):
+    ANNUAL = "annual"
+    QUARTERLY = "quarterly" 
+    TTM = "ttm"
+
 # 1. Income Statements
 @router.get("/financials/income-statements/{ticker}", response_model=IncomeStatementsResponse)
-def get_income_statements(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period}&limit={limit}"
-    response = requests.get(url, headers=HEADERS)
-
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            validated_data = IncomeStatementsResponse(**data)
-            return validated_data
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Data validation error: {str(e)}")
-    else:
-        raise HTTPException(status_code=response.status_code, detail="Error fetching income statements")
+def get_income_statements(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL, 
+    limit: int | None = None,
+    cik: str | None = None
+):
+    # Convert the FinancialPeriod enum to its value
+    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+    
+    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period_value}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
+    
+    print(f"[{ticker}] Requesting income statements: {url}")
+    try:
+        response = requests.get(url, headers=HEADERS)
+        print(f"[{ticker}] Income statements response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"[{ticker}] Successfully parsed JSON response")
+                validated_data = IncomeStatementsResponse(**data)
+                return validated_data
+            except Exception as e:
+                print(f"[{ticker}] Error validating income statements data: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Data validation error: {str(e)}")
+        else:
+            error_message = f"Error fetching income statements for {ticker}"
+            try:
+                error_detail = response.json()
+                print(f"[{ticker}] Error response: {error_detail}")
+                error_message += f": {error_detail}"
+            except:
+                error_message += f": Status {response.status_code}"
+            
+            print(f"[{ticker}] {error_message}")
+            raise HTTPException(status_code=response.status_code, detail=error_message)
+            
+    except requests.exceptions.RequestException as e:
+        print(f"[{ticker}] Request failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
 
 # 2. Balance Sheets
 @router.get("/financials/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
-def get_balance_sheets(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period}&limit={limit}"
+def get_balance_sheets(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL,
+    limit: int | None = None,
+    cik: str | None = None
+):
+    # Convert the FinancialPeriod enum to its value
+    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+
+    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period_value}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -39,8 +88,20 @@ def get_balance_sheets(ticker: str, period: str = "annual", limit: int = 5):
 
 # 3. Cash Flow Statements
 @router.get("/financials/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
-def get_cash_flow_statements(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period}&limit={limit}"
+def get_cash_flow_statements(
+    ticker: str, 
+    period: FinancialPeriod = FinancialPeriod.ANNUAL,
+    limit: int | None = None,
+    cik: str | None = None
+):
+    # Convert the FinancialPeriod enum to its value
+    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+
+    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period_value}"
+    if limit:
+        url += f"&limit={limit}"
+    if cik:
+        url += f"&cik={cik}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:

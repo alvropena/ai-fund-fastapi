@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ai-financial-analyst"
+name = "ai-fund-fastapi"
 version = "0.1.0"
 description = ""
 authors = ["Alvaro Peña"]
@@ -27,6 +27,8 @@ sentence-transformers = "^3.2.1"
 accelerate = "^1.0.1"
 tiktoken = "^0.8.0"
 numpy = "^1.24.0"
+black = "^24.10.0"
+pytest = "^8.3.3"
 
 
 [tool.poetry.group.dev.dependencies]
