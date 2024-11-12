@@ -1,22 +1,27 @@
 version: '3'
 
 tasks:
-  run:
+  docker-run:
     desc: Run the backend using Docker Compose
     cmds:
       - docker-compose up --build
 
-  stop:
+  docker-stop:
     desc: Stop the running Docker Compose services
     cmds:
       - docker-compose down
 
-  logs:
+  docker-logs:
     desc: View logs of the running services
     cmds:
       - docker-compose logs -f
 
-  shell:
+  docker-shell:
     desc: Open a shell in the running app container
     cmds:
       - docker-compose exec app /bin/sh
+
+  run:
+    desc: Run the backend using uvicorn
+    cmds:
+      - poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

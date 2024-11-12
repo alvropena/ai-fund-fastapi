@@ -66,7 +66,10 @@ def get_balance_sheets(
     limit: int | None = None,
     cik: str | None = None
 ):
-    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period}"
+    # Convert the FinancialPeriod enum to its value
+    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+
+    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -91,7 +94,10 @@ def get_cash_flow_statements(
     limit: int | None = None,
     cik: str | None = None
 ):
-    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period}"
+    # Convert the FinancialPeriod enum to its value
+    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+
+    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:

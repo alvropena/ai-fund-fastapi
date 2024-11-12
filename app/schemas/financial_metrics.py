@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel
-
+from datetime import date
 class MetricCategory(str, Enum):
     LIQUIDITY = "liquidity"
     EBITDA = "ebitda"
@@ -18,6 +18,8 @@ class MetricGroup(BaseModel):
 
 class GroupedMetrics(BaseModel):
     """Pydantic model for grouped financial metrics"""
+    period: str
+    report_date: date
     groups: List[MetricGroup]
 
     class Config:
