@@ -12,7 +12,7 @@ async def get_company_news(ticker: str, limit: int = 5):
         
         # Search for news about the company
         response = client.search(
-            query=f"{ticker} stock company news",
+            query=f"Please, provide me with the latest news about {ticker}",
             search_depth="advanced",
             topic="news",
             max_results=limit

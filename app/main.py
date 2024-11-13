@@ -1,4 +1,5 @@
 from app.endpoints.financial_datasets import company, financials, insider_transactions, prices
+from app.endpoints import news
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.endpoints import metrics
@@ -23,6 +24,7 @@ app.include_router(financials.router, prefix="/financials", tags=["Financials"])
 app.include_router(insider_transactions.router, prefix="/insider-transactions", tags=["Insider Transactions"])
 app.include_router(prices.router, prefix="/prices", tags=["Prices"])
 app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])
+app.include_router(news.router, prefix="/news", tags=["News"])
 
 if __name__ == "__main__":
     import uvicorn
