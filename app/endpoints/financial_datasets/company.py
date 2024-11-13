@@ -5,7 +5,7 @@ from config import BASE_URL, HEADERS  # Import from config
 router = APIRouter()
 
 # Company Facts Endpoint
-@router.get("/company/facts/{ticker}")
+@router.get("/facts/{ticker}")
 def get_company_facts(ticker: str):
     url = f"{BASE_URL}/company/facts?ticker={ticker}"
     response = requests.get(url, headers=HEADERS)
