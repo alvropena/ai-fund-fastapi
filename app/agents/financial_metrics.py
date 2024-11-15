@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from models import BalanceSheetModel, IncomeStatementModel, CashFlowStatementModel
 
 class FinancialMetrics(BaseModel):
@@ -7,7 +7,7 @@ class FinancialMetrics(BaseModel):
     
     def calculate_liquidity_ratios(self, balance_sheet: BalanceSheetModel) -> Dict[str, float]:
         return {
-            "current_ratio": balance_sheet.current_assets / balance_sheet.current_liabilities,
+            "current_ratio": self.calculate_current_ratio(balance_sheet.current_assets, balance_sheet.current_liabilities),
             "acid_test_ratio": (balance_sheet.current_assets - balance_sheet.inventory) / balance_sheet.current_liabilities,
             "defensive_interval_ratio": balance_sheet.cash_and_equivalents / balance_sheet.current_liabilities
         }
@@ -103,3 +103,9 @@ class FinancialMetrics(BaseModel):
             result["price_to_earnings_ratio"] = stock_price / earnings_per_share
 
         return result
+
+    def calculate_current_ratio(self, current_assets: Optional[float], current_liabilities: Optional[float]) -> Optional[float]:
+        """Calculate current ratio with None handling"""
+        if current_assets is None or current_liabilities is None or current_liabilities == 0:
+            return None
+        return current_assets / current_liabilities

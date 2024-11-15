@@ -28,49 +28,44 @@ async def get_grouped_metrics(
         income_statements.income_statements,
         cash_flow_statements.cash_flow_statements
     ):
-        try:
-            # Calculate all metrics
-            liquidity_metrics = metrics.calculate_liquidity_ratios(balance_sheet)
-            ebitda_metrics = metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement)
-            leverage_metrics = metrics.calculate_leverage_ratios(balance_sheet)
-            efficiency_metrics = metrics.calculate_efficiency_ratios(income_statement, balance_sheet)
-            profitability_metrics = metrics.calculate_profitability_ratios(income_statement, balance_sheet)
-            dupont_metrics = metrics.calculate_dupont_ratios(income_statement, balance_sheet)
-            economic_value_metrics = metrics.calculate_economic_value_ratios(
+        # Calculate all metrics with safe error handling
+        metric_calculations = {
+            MetricCategory.LIQUIDITY: lambda: metrics.calculate_liquidity_ratios(balance_sheet),
+            MetricCategory.EBITDA: lambda: metrics.calculate_ebitda_ratios(income_statement, cash_flow_statement),
+            MetricCategory.LEVERAGE: lambda: metrics.calculate_leverage_ratios(balance_sheet),
+            MetricCategory.EFFICIENCY: lambda: metrics.calculate_efficiency_ratios(income_statement, balance_sheet),
+            MetricCategory.PROFITABILITY: lambda: metrics.calculate_profitability_ratios(income_statement, balance_sheet),
+            MetricCategory.DUPONT: lambda: metrics.calculate_dupont_ratios(income_statement, balance_sheet),
+            MetricCategory.ECONOMIC_VALUE: lambda: metrics.calculate_economic_value_ratios(
                 income_statement, 
                 balance_sheet, 
                 cost_of_equity
-            )
-            stock_performance_metrics = metrics.calculate_stock_performance_ratios(
+            ),
+            MetricCategory.STOCK_PERFORMANCE: lambda: metrics.calculate_stock_performance_ratios(
                 income_statement, 
                 balance_sheet, 
                 cash_flow_statement, 
                 stock_price
             )
+        }
 
-            # Create MetricGroup objects for each category
-            metric_groups = [
-                MetricGroup(category=MetricCategory.LIQUIDITY, metrics=liquidity_metrics),
-                MetricGroup(category=MetricCategory.EBITDA, metrics=ebitda_metrics),
-                MetricGroup(category=MetricCategory.LEVERAGE, metrics=leverage_metrics),
-                MetricGroup(category=MetricCategory.EFFICIENCY, metrics=efficiency_metrics),
-                MetricGroup(category=MetricCategory.PROFITABILITY, metrics=profitability_metrics),
-                MetricGroup(category=MetricCategory.DUPONT, metrics=dupont_metrics),
-                MetricGroup(category=MetricCategory.ECONOMIC_VALUE, metrics=economic_value_metrics),
-                MetricGroup(category=MetricCategory.STOCK_PERFORMANCE, metrics=stock_performance_metrics),
-            ]
+        metric_groups = []
+        for category, calculation in metric_calculations.items():
+            try:
+                metrics_result = calculation()
+                # Filter out None values from the metrics result
+                valid_metrics = {k: v for k, v in metrics_result.items() if v is not None}
+                metric_groups.append(MetricGroup(category=category, metrics=valid_metrics))
+            except Exception as e:
+                # Add empty metrics group instead of failing
+                metric_groups.append(MetricGroup(category=category, metrics={}))
 
-            metrics_for_period = GroupedMetrics(
-                period=income_statement.period,
-                report_date=income_statement.report_period,
-                groups=metric_groups
-            )
-            grouped_metrics.append(metrics_for_period)
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error calculating metrics: {str(e)}"
-            )
+        metrics_for_period = GroupedMetrics(
+            period=income_statement.period,
+            report_date=income_statement.report_period,
+            groups=metric_groups
+        )
+        grouped_metrics.append(metrics_for_period)
         
     return grouped_metrics
 
@@ -85,23 +80,10 @@ async def get_ticker_metrics(
     metrics: FinancialMetrics = Depends()
 ):
     try:
-        # Get financial statements with logging
-        print(f"Fetching financial data for {ticker}")
-        
+        # Get financial statements
         income_statements = get_income_statements(ticker=ticker, period=period, limit=limit, cik=cik)
-        print(f"Income statements retrieved: {bool(income_statements)}")
-        if income_statements:
-            print(f"Number of income statements: {len(income_statements.income_statements)}")
-        
         balance_sheets = get_balance_sheets(ticker=ticker, period=period, limit=limit, cik=cik)
-        print(f"Balance sheets retrieved: {bool(balance_sheets)}")
-        if balance_sheets:
-            print(f"Number of balance sheets: {len(balance_sheets.balance_sheets)}")
-        
         cash_flows = get_cash_flow_statements(ticker=ticker, period=period, limit=limit, cik=cik)
-        print(f"Cash flows retrieved: {bool(cash_flows)}")
-        if cash_flows:
-            print(f"Number of cash flows: {len(cash_flows.cash_flow_statements)}")
 
         # Validate we have data with more specific error messages
         if not income_statements:
@@ -137,8 +119,6 @@ async def get_ticker_metrics(
                 detail=f"Cash flow statements list is empty for {ticker}"
             )
 
-        print(f"All financial data retrieved successfully for {ticker}")
-
         try:
             # Calculate grouped metrics for each period
             result = await get_grouped_metrics(
@@ -149,10 +129,8 @@ async def get_ticker_metrics(
                 cost_of_equity=cost_of_equity,
                 metrics=metrics
             )
-            print(f"Metrics calculated successfully for {ticker}")
             return result
         except Exception as calc_error:
-            print(f"Error calculating metrics for {ticker}: {str(calc_error)}")
             raise HTTPException(
                 status_code=500,
                 detail=f"Error calculating metrics for {ticker}: {str(calc_error)}"
@@ -162,7 +140,6 @@ async def get_ticker_metrics(
         # Re-raise HTTP exceptions
         raise http_error
     except Exception as e:
-        print(f"Unexpected error processing {ticker}: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Unexpected error processing {ticker}: {str(e)}"

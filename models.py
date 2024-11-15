@@ -52,8 +52,8 @@ class BalanceSheetModel(BaseModel):
     period: str
     currency: str
     total_assets: float
-    current_assets: float
-    cash_and_equivalents: float
+    current_assets: Optional[float] = None
+    cash_and_equivalents: Optional[float] = None
     inventory: Optional[float] = None
     current_investments: Optional[float] = None
     trade_and_non_trade_receivables: Optional[float] = None
@@ -65,7 +65,7 @@ class BalanceSheetModel(BaseModel):
     outstanding_shares: Optional[float] = None
     tax_assets: Optional[float] = None
     total_liabilities: float
-    current_liabilities: float
+    current_liabilities: Optional[float] = None
     current_debt: Optional[float] = None
     trade_and_non_trade_payables: Optional[float] = None
     deferred_revenue: Optional[float] = None
@@ -146,5 +146,5 @@ class LineItemSearchResponse(BaseModel):
 class RatioResponse(BaseModel):
     ticker: str
     ratio_name: str
-    ratio_value: float
+    ratio_value: Optional[float] = None
     date: date

@@ -7,7 +7,7 @@ router = APIRouter()
 @router.get("/{ticker}")
 async def get_company_news(ticker: str, limit: int = 5):
     try:
-        # Initialize Tavily client
+    # Initialize Tavily client
         client = TavilyClient(api_key=TAVILY_API_KEY)
         
         # Search for news about the company

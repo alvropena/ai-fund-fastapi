@@ -12,54 +12,43 @@ class FinancialPeriod(str, Enum):
     TTM = "ttm"
 
 # 1. Income Statements
-@router.get("/income-statements/{ticker}", response_model=IncomeStatementsResponse)
+@router.get("/financials/income-statements/{ticker}", response_model=IncomeStatementsResponse)
 def get_income_statements(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL, 
     limit: int | None = None,
     cik: str | None = None
 ):
-    # Convert the FinancialPeriod enum to its value
-    period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
+    period_value = period.value
     
-    url = f"{BASE_URL}/income-statements?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
         url += f"&cik={cik}"
     
-    print(f"[{ticker}] Requesting income statements: {url}")
     try:
         response = requests.get(url, headers=HEADERS)
-        print(f"[{ticker}] Income statements response status: {response.status_code}")
         
         if response.status_code == 200:
             try:
                 data = response.json()
-                print(f"[{ticker}] Successfully parsed JSON response")
                 validated_data = IncomeStatementsResponse(**data)
                 return validated_data
             except Exception as e:
-                print(f"[{ticker}] Error validating income statements data: {str(e)}")
                 raise HTTPException(status_code=500, detail=f"Data validation error: {str(e)}")
         else:
-            error_message = f"Error fetching income statements for {ticker}"
             try:
                 error_detail = response.json()
-                print(f"[{ticker}] Error response: {error_detail}")
-                error_message += f": {error_detail}"
             except:
-                error_message += f": Status {response.status_code}"
-            
-            print(f"[{ticker}] {error_message}")
-            raise HTTPException(status_code=response.status_code, detail=error_message)
+                pass
+            raise HTTPException(status_code=response.status_code, detail=f"Error fetching income statements: Status {response.status_code}")
             
     except requests.exceptions.RequestException as e:
-        print(f"[{ticker}] Request failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
 
 # 2. Balance Sheets
-@router.get("/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
+@router.get("/financials/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
 def get_balance_sheets(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL,
@@ -69,7 +58,7 @@ def get_balance_sheets(
     # Convert the FinancialPeriod enum to its value
     period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
 
-    url = f"{BASE_URL}/balance-sheets?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -87,7 +76,7 @@ def get_balance_sheets(
         raise HTTPException(status_code=response.status_code, detail="Error fetching balance sheets")
 
 # 3. Cash Flow Statements
-@router.get("/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
+@router.get("/financials/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
 def get_cash_flow_statements(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL,
@@ -97,7 +86,7 @@ def get_cash_flow_statements(
     # Convert the FinancialPeriod enum to its value
     period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
 
-    url = f"{BASE_URL}/cash-flow-statements?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -115,9 +104,9 @@ def get_cash_flow_statements(
         raise HTTPException(status_code=response.status_code, detail="Error fetching cash flow statements")
 
 # 4. Segmented Financials
-@router.get("/segmented/{ticker}", response_model=SegmentedFinancialsResponse)
+@router.get("/financials/segmented/{ticker}", response_model=SegmentedFinancialsResponse)
 def get_segmented_financials(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/segmented?ticker={ticker}&period={period}&limit={limit}"
+    url = f"{BASE_URL}/financials/segmented?ticker={ticker}&period={period}&limit={limit}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -132,9 +121,9 @@ def get_segmented_financials(ticker: str, period: str = "annual", limit: int = 5
         raise HTTPException(status_code=response.status_code, detail="Error fetching segmented financials")
     
 # 5. All Financials for a Ticker
-@router.get("/{ticker}", response_model=AllFinancialsResponse)
+@router.get("/financials/{ticker}", response_model=AllFinancialsResponse)
 def get_all_financials(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}?ticker={ticker}&period={period}&limit={limit}"
+    url = f"{BASE_URL}/financials/{ticker}?period={period}&limit={limit}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -148,9 +137,9 @@ def get_all_financials(ticker: str, period: str = "annual", limit: int = 5):
         raise HTTPException(status_code=response.status_code, detail="Error fetching financials")
 
 # 6. Search Financials (POST)
-@router.post("/search", response_model=FinancialSearchResponse)
+@router.post("/financials/search", response_model=FinancialSearchResponse)
 def search_financials(payload: FinancialSearchPayload):
-    url = f"{BASE_URL}/search"
+    url = f"{BASE_URL}/financials/search"
     response = requests.post(url, json=payload.dict(), headers={**HEADERS, "Content-Type": "application/json"})
     
     if response.status_code == 200:
@@ -164,9 +153,9 @@ def search_financials(payload: FinancialSearchPayload):
         raise HTTPException(status_code=response.status_code, detail="Error performing financial search")
 
 # 7. Search Line Items (POST)
-@router.post("/search/line-items", response_model=LineItemSearchResponse)
+@router.post("/financials/search/line-items", response_model=LineItemSearchResponse)
 def search_line_items(payload: LineItemsPayload):
-    url = f"{BASE_URL}/search/line-items"
+    url = f"{BASE_URL}/financials/search/line-items"
     response = requests.post(url, json=payload.dict(), headers={**HEADERS, "Content-Type": "application/json"})
     
     if response.status_code == 200:
