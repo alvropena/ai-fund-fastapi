@@ -12,7 +12,7 @@ class FinancialPeriod(str, Enum):
     TTM = "ttm"
 
 # 1. Income Statements
-@router.get("/financials/income-statements/{ticker}", response_model=IncomeStatementsResponse)
+@router.get("/income-statements/{ticker}", response_model=IncomeStatementsResponse)
 def get_income_statements(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL, 
@@ -22,7 +22,7 @@ def get_income_statements(
     # Convert the FinancialPeriod enum to its value
     period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
     
-    url = f"{BASE_URL}/financials/income-statements?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/income-statements?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -59,7 +59,7 @@ def get_income_statements(
         raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
 
 # 2. Balance Sheets
-@router.get("/financials/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
+@router.get("/balance-sheets/{ticker}", response_model=BalanceSheetsResponse)
 def get_balance_sheets(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL,
@@ -69,7 +69,7 @@ def get_balance_sheets(
     # Convert the FinancialPeriod enum to its value
     period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
 
-    url = f"{BASE_URL}/financials/balance-sheets?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/balance-sheets?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -87,7 +87,7 @@ def get_balance_sheets(
         raise HTTPException(status_code=response.status_code, detail="Error fetching balance sheets")
 
 # 3. Cash Flow Statements
-@router.get("/financials/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
+@router.get("/cash-flow-statements/{ticker}", response_model=CashFlowStatementsResponse)
 def get_cash_flow_statements(
     ticker: str, 
     period: FinancialPeriod = FinancialPeriod.ANNUAL,
@@ -97,7 +97,7 @@ def get_cash_flow_statements(
     # Convert the FinancialPeriod enum to its value
     period_value = period.value  # This will convert FinancialPeriod.ANNUAL to "annual"
 
-    url = f"{BASE_URL}/financials/cash-flow-statements?ticker={ticker}&period={period_value}"
+    url = f"{BASE_URL}/cash-flow-statements?ticker={ticker}&period={period_value}"
     if limit:
         url += f"&limit={limit}"
     if cik:
@@ -115,9 +115,9 @@ def get_cash_flow_statements(
         raise HTTPException(status_code=response.status_code, detail="Error fetching cash flow statements")
 
 # 4. Segmented Financials
-@router.get("/financials/segmented/{ticker}", response_model=SegmentedFinancialsResponse)
+@router.get("/segmented/{ticker}", response_model=SegmentedFinancialsResponse)
 def get_segmented_financials(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials/segmented?ticker={ticker}&period={period}&limit={limit}"
+    url = f"{BASE_URL}/segmented?ticker={ticker}&period={period}&limit={limit}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -132,9 +132,9 @@ def get_segmented_financials(ticker: str, period: str = "annual", limit: int = 5
         raise HTTPException(status_code=response.status_code, detail="Error fetching segmented financials")
     
 # 5. All Financials for a Ticker
-@router.get("/financials/{ticker}", response_model=AllFinancialsResponse)
+@router.get("/{ticker}", response_model=AllFinancialsResponse)
 def get_all_financials(ticker: str, period: str = "annual", limit: int = 5):
-    url = f"{BASE_URL}/financials?ticker={ticker}&period={period}&limit={limit}"
+    url = f"{BASE_URL}?ticker={ticker}&period={period}&limit={limit}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code == 200:
@@ -148,9 +148,9 @@ def get_all_financials(ticker: str, period: str = "annual", limit: int = 5):
         raise HTTPException(status_code=response.status_code, detail="Error fetching financials")
 
 # 6. Search Financials (POST)
-@router.post("/financials/search", response_model=FinancialSearchResponse)
+@router.post("/search", response_model=FinancialSearchResponse)
 def search_financials(payload: FinancialSearchPayload):
-    url = f"{BASE_URL}/financials/search"
+    url = f"{BASE_URL}/search"
     response = requests.post(url, json=payload.dict(), headers={**HEADERS, "Content-Type": "application/json"})
     
     if response.status_code == 200:
@@ -164,9 +164,9 @@ def search_financials(payload: FinancialSearchPayload):
         raise HTTPException(status_code=response.status_code, detail="Error performing financial search")
 
 # 7. Search Line Items (POST)
-@router.post("/financials/search/line-items", response_model=LineItemSearchResponse)
+@router.post("/search/line-items", response_model=LineItemSearchResponse)
 def search_line_items(payload: LineItemsPayload):
-    url = f"{BASE_URL}/financials/search/line-items"
+    url = f"{BASE_URL}/search/line-items"
     response = requests.post(url, json=payload.dict(), headers={**HEADERS, "Content-Type": "application/json"})
     
     if response.status_code == 200:

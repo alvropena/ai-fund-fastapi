@@ -4,7 +4,7 @@ from config import TAVILY_API_KEY  # Add this to your config file
 
 router = APIRouter()
 
-@router.get("/news/{ticker}")
+@router.get("/{ticker}")
 async def get_company_news(ticker: str, limit: int = 5):
     try:
         # Initialize Tavily client
